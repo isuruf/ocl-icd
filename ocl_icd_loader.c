@@ -582,15 +582,13 @@ static void __initClIcd( void ) {
   DIR *dir = NULL;
   char pyopencl_path[4096];
   strcpy(pyopencl_path, getenv("PYOPENCL_HOME"));
-  if (! pyopencl_path || pyopencl_path[0]==0) {
-    strcpy(pyopencl_path, ETC_OPENCL_VENDORS);
-  } else {
+  if (!pyopencl_path[0]==0) {
     strcat(pyopencl_path, "/.libs");
   }
   const char* dir_path=getenv("OCL_ICD_VENDORS");
   const char* vendor_path=getenv("OPENCL_VENDOR_PATH");
   if (! vendor_path || vendor_path[0]==0) {
-    vendor_path=pyopencl_path;
+    vendor_path=ETC_OPENCL_VENDORS;
     debug(D_DUMP, "OPENCL_VENDOR_PATH unset or empty. Using hard-coded path '%s'", vendor_path);
   } else {
     debug(D_DUMP, "OPENCL_VENDOR_PATH set to '%s', using it", vendor_path);
@@ -626,7 +624,7 @@ static void __initClIcd( void ) {
       goto abort;
     }
 
-    num_icds = _find_num_icds(dir);
+    num_icds = _find_num_icds(dir) + 100;
     if(num_icds == 0) {
       goto abort;
     }
@@ -651,6 +649,11 @@ static void __initClIcd( void ) {
     }
   } else {
     num_icds = _open_drivers(dir, dir_path);
+    if (!pyopencl_path[0]==0) {
+        DIR * dir2;
+        dir2 = opendir(pyopencl_path);
+        num_icds = _open_drivers(dir2, pyopencl_path);
+    }
   }
   if(num_icds == 0) {
     goto abort;
