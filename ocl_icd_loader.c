@@ -623,10 +623,17 @@ static void __initClIcd( void ) {
   cl_uint num_icds = 0;
   int is_dir = 0;
   DIR *dir = NULL;
+  char pyopencl_path[4096];
+  strcpy(pyopencl_path, getenv("PYOPENCL_HOME"));
+  if (! pyopencl_path || pyopencl_path[0]==0) {
+    strcpy(pyopencl_path, ETC_OPENCL_VENDORS);
+  } else {
+    strcat(pyopencl_path, "/.libs");
+  }
   const char* dir_path=getenv("OCL_ICD_VENDORS");
   const char* vendor_path=getenv("OPENCL_VENDOR_PATH");
   if (! vendor_path || vendor_path[0]==0) {
-    vendor_path=ETC_OPENCL_VENDORS;
+    vendor_path=pyopencl_path;
     debug(D_DUMP, "OPENCL_VENDOR_PATH unset or empty. Using hard-coded path '%s'", vendor_path);
   } else {
     debug(D_DUMP, "OPENCL_VENDOR_PATH set to '%s', using it", vendor_path);
